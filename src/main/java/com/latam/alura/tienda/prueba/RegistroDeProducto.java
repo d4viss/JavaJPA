@@ -19,7 +19,11 @@ public class RegistroDeProducto {
 		EntityManagerFactory factory = Persistence.createEntityManagerFactory("tienda");
 		EntityManager manager = factory.createEntityManager();
 		
+		manager.getTransaction().begin();		
 		manager.persist(celular);
+		manager.getTransaction().commit();
+		manager.close();
+		
 	}
 
 }

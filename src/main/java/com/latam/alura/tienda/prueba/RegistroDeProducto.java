@@ -1,35 +1,48 @@
 package com.latam.alura.tienda.prueba;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 
+import com.latam.alura.tienda.dao.CategoriaDAO;
+import com.latam.alura.tienda.dao.ProductoDAO;
 import com.latam.alura.tienda.modelo.Categoria;
+import com.latam.alura.tienda.modelo.Producto;
 import com.latam.alura.tienda.utils.JPAUtils;
 
 public class RegistroDeProducto {
 
 	public static void main(String[] args) {
-		Categoria celulares = new Categoria("CELULARES");
+		registrarProducto();
 		
 		EntityManager manager = JPAUtils.getEntityManager();
+		ProductoDAO productoDAO = new ProductoDAO(manager);
 		
-		manager.getTransaction().begin();	
+		Producto producto = productoDAO.consultaPorId(1l);
 		
-		manager.persist(celulares);
+		System.out.println(producto.getNombre());
 		
-		celulares.setNombre("LIBROS");
+		BigDecimal precio = productoDAO.consultaPrecioPorNombreProducto("Xiaomi Redmi");
+		System.out.println(precio);
+	}
+
+	private static void registrarProducto() {
+		Categoria celulares = new Categoria("CELULARES");
 		
-		manager.flush();
-		manager.clear();
+		Producto celular = new Producto("Xiaomi Redmi", "Muito legal", new BigDecimal("800"), celulares);
 		
-		celulares =  manager.merge(celulares);
-		celulares.setNombre("SOFTWARE");
+		EntityManager manager = JPAUtils.getEntityManager();
+		ProductoDAO productoDAO = new ProductoDAO(manager);
+		CategoriaDAO categoriaDAO = new CategoriaDAO(manager);
 		
-		manager.flush();
-		manager.clear();
-		celulares = manager.merge(celulares);
-		manager.remove(celulares);
-		manager.flush();
+		manager.getTransaction().begin();
 		
+		categoriaDAO.guardar(celulares);
+		productoDAO.guardar(celular);
+		
+		manager.getTransaction().commit();
+		manager.close();
 	}
 
 }

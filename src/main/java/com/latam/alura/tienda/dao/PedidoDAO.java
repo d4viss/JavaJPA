@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import com.latam.alura.tienda.modelo.Pedido;
+import com.latam.alura.tienda.vo.RelatorioVenta;
 
 
 public class PedidoDAO {
@@ -29,19 +30,37 @@ public class PedidoDAO {
 		return manager.createQuery(jpql, Pedido.class).getResultList();
 	}
 	
-	public List<Pedido> consultaPorNombre(String nombre){
-		String jpql = "SELECT P FROM pedido AS P WHERE P.nombre = :nombre";
-//		String jpql = "SELECT P FROM pedido AS P WHERE P.nombre = 1";
-		return manager.createQuery(jpql, Pedido.class).setParameter("nombre", nombre).getResultList();
+	public BigDecimal valorTotalVendido() {
+		String jpql = "SELECT SUM(p.valorTotal) FROM Pedido p";
+		return manager.createQuery(jpql, BigDecimal.class).getSingleResult();
 	}
 	
-	public List<Pedido> consultaPorCategoria(String categoria){
-		String jpql = "SELECT P FROM pedido AS P WHERE P.categoria.nombre = :categoria";
-		return manager.createQuery(jpql, Pedido.class).setParameter("categoria", categoria).getResultList();
+	public BigDecimal valorPromedioVendido() {
+		String jpql = "SELECT AVG(p.valorTotal) FROM Pedido p";
+		return manager.createQuery(jpql, BigDecimal.class).getSingleResult();
 	}
 	
-	public BigDecimal consultaPrecioPorNombrepedido(String nombre) {
-		String jpql = "SELECT P.precio FROM pedido AS P WHERE P.nombre = :nombre";
-		return manager.createQuery(jpql, BigDecimal.class).setParameter("nombre", nombre).getSingleResult();
+	public List<Object[]> relatorioDeVentas(){
+		String jpql = "SELECT producto.nombre, "
+				+ "SUM(item.cantidad), "
+				+ "MAX(pedido.fecha) "
+				+ "FROM Pedido pedido "
+				+ "JOIN pedido.items item "
+				+ "JOIN item.producto producto "
+				+ "GROUP BY producto.nombre "
+				+ "ORDER BY item.cantidad DESC";
+		return manager.createQuery(jpql, Object[].class).getResultList();
+	}
+	
+	public List<RelatorioVenta> relatorioDeVentasVO(){
+		String jpql = "SELECT new com.latam.alura.tienda.vo.RelatorioVenta(producto.nombre, "
+				+ "SUM(item.cantidad), "
+				+ "MAX(pedido.fecha)) "
+				+ "FROM Pedido pedido "
+				+ "JOIN pedido.items item "
+				+ "JOIN item.producto producto "
+				+ "GROUP BY producto.nombre "
+				+ "ORDER BY item.cantidad DESC";
+		return manager.createQuery(jpql, RelatorioVenta.class).getResultList();
 	}
 }

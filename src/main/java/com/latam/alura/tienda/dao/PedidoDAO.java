@@ -63,4 +63,9 @@ public class PedidoDAO {
 				+ "ORDER BY item.cantidad DESC";
 		return manager.createQuery(jpql, RelatorioVenta.class).getResultList();
 	}
+	
+	public Pedido consultarPedidoConCliente(Long id) {
+		String jpql = "SELECT p FROM Pedido p JOIN FETCH p.cliente WHERE p.id=:id";
+		return manager.createQuery(jpql, Pedido.class).setParameter("id", id).getSingleResult();
+	}
 }

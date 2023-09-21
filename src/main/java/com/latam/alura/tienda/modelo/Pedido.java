@@ -2,9 +2,12 @@ package com.latam.alura.tienda.modelo;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -20,19 +23,25 @@ public class Pedido {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private LocalDate fecha = LocalDate.now();
-	private BigDecimal valorTotal;
+	private BigDecimal valorTotal = new BigDecimal(0);
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private Cliente cliente;
 	
-	@OneToMany
-	private List<ItemsPedido> items;
+	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+	private List<ItemsPedido> items = new ArrayList<>();
 	
 	public Pedido() {}
 
 	public Pedido(Cliente cliente) {
 		super();
 		this.cliente = cliente;
+	}
+	
+	public void agregarItems(ItemsPedido item){
+		item.setPedido(this);
+		this.items.add(item);
+		this.valorTotal = this.valorTotal.add(item.getValor());
 	}
 
 	public Long getId() {
@@ -65,5 +74,13 @@ public class Pedido {
 
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+
+	public List<ItemsPedido> getItems() {
+		return items;
+	}
+
+	public void setItems(List<ItemsPedido> items) {
+		this.items = items;
 	}
 }
